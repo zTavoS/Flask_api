@@ -15,8 +15,6 @@ services:
       - db-password
     volumes:
       - db-data:/var/lib/mysql
-    networks:
-      - backnet
     environment:
       - MYSQL_DATABASE=example
       - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db-password
@@ -37,30 +35,12 @@ services:
       - 8000:8000
     environment:
       - PYTHONUNBUFFERED=1
-    networks:
-      - backnet
-      - frontnet
     depends_on:
       db:
         condition: service_healthy
-
-  proxy:
-    build: proxy
-    restart: always
-    ports:
-      - 80:80
-    depends_on: 
-      - backend
-    networks:
-      - frontnet
-
 volumes:
   db-data:
 
 secrets:
   db-password:
     file: db/password.txt
-
-networks:
-  backnet:
-  frontnet:
