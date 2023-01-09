@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 app.debug = True
 
+
 def dictfetchall(cursor):
     "Return all rows from a cursor as a dict"
     columns = [col[0] for col in cursor.description]
@@ -13,6 +14,8 @@ def dictfetchall(cursor):
         dict(zip(columns, row))
         for row in cursor.fetchall()
     ]
+
+
 # Crea una conexión con la base de datos
 class DBManager:
     def __init__(self, database='example', host="db", user="root", password_file=None):
@@ -30,20 +33,19 @@ class DBManager:
         self.connection.commit()
 
     def insert_clientes(self, clientes):
-        print([(clientes[i]["nombre"], clientes[i]["celular"], clientes[i]["correo"]) for i in range(0, len(clientes))])
         self.cursor.executemany('INSERT INTO clientes (nombre, celular, correo) VALUES (%s, %s, %s);', [(clientes[i]["nombre"], clientes[i]["celular"], clientes[i]["correo"]) for i in range(0, len(clientes))])
-        self.connection.commit()
-
-    def insert_clientes(self, cliente_id):
-        print(cliente_id)
-        self.cursor.executemany('Delete from clientes where id={}'.format(cliente_id))
         self.connection.commit()
 
     def list_clientes(self):
         self.cursor.execute('SELECT * FROM clientes')
         rows = dictfetchall(self.cursor)
-        print(rows)
         return rows
+
+    def eliminar_cliente(self, client_id):
+        for cliente in client_id:
+            print("DELETE FROM clientes WHERE id={cliente}".format(cliente=cliente))
+            self.cursor.execute("DELETE FROM clientes WHERE id={cliente}".format(cliente=cliente))
+            self.connection.commit()
 
 
 cnx = DBManager(password_file='/run/secrets/db-password')
@@ -69,7 +71,7 @@ def agregar_clientes():
     print("LLEGO AQUI")
     # Obtiene los datos del formulario
     clientes_data = request.get_json()["clientes"]
-    print(type(clientes_data))
+    print(clientes_data)
     cnx.insert_clientes(clientes_data)
     clientes = cnx.list_clientes()
     return clientes
@@ -80,3 +82,13 @@ def list_clientes():
     clientes = cnx.list_clientes()
     return clientes
 
+
+@app.route('/api/eliminar_cliente', methods=['POST'])
+def eliminar_cliente():
+    print("LLEGO AQUI")
+    # Obtiene los datos del formulario
+    cliente_id = request.form.get('id').split(',')
+    print(cliente_id)
+    cnx.eliminar_cliente(cliente_id)
+    clientes = cnx.list_clientes()
+    return clientes
