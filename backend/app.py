@@ -18,16 +18,16 @@ def dictfetchall(cursor):
 
 # Crea una conexión con la base de datos
 class DBManager:
-    def __init__(self, database='example', host="db", user="root", password_file=None):
-        pf = open(password_file, 'r')
+    def __init__(self, database='example', host="db", user="root", password=None):
+        
         self.connection = mysql.connector.connect(
             user=user,
-            password=pf.read(),
+            password=password,
             host=host,  # name of the mysql service as set in the docker compose file
             database=database,
             auth_plugin='mysql_native_password'
         )
-        pf.close()
+
         self.cursor = self.connection.cursor()
         self.cursor.execute("Create table IF NOT EXISTS clientes(id int(11) PRIMARY KEY AUTO_INCREMENT, nombre varchar(150) NOT NULL, celular varchar(14) NOT NULL, correo varchar(150) NOT NULL);")
         self.connection.commit()
@@ -48,7 +48,7 @@ class DBManager:
             self.connection.commit()
 
 
-cnx = DBManager(password_file='/run/secrets/db-password')
+cnx = DBManager(password='db-78n9n')
 
 
 @app.route('/api/agregar_cliente', methods=['POST'])
