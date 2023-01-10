@@ -4,7 +4,7 @@ import mysql.connector
 # Crea una instancia de Flask
 app = Flask(__name__)
 
-app.debug = True
+# app.debug = True
 
 
 def dictfetchall(cursor):
@@ -29,7 +29,7 @@ class DBManager:
         )
         pf.close()
         self.cursor = self.connection.cursor()
-        self.cursor.execute("""Create table IF NOT EXISTS clientes(id int(11) PRIMARY KEY AUTO_INCREMENT, nombre varchar(150) NOT NULL, celular varchar(14) NOT NULL, correo varchar(150) NOT NULL );""")
+        self.cursor.execute("Create table IF NOT EXISTS clientes(id int(11) PRIMARY KEY AUTO_INCREMENT, nombre varchar(150) NOT NULL, celular varchar(14) NOT NULL, correo varchar(150) NOT NULL);")
         self.connection.commit()
 
     def insert_clientes(self, clientes):
@@ -49,12 +49,10 @@ class DBManager:
 
 
 cnx = DBManager(password_file='/run/secrets/db-password')
-cursor = cnx.cursor
 
 
 @app.route('/api/agregar_cliente', methods=['POST'])
 def agregar_cliente():
-    print("LLEGO AQUI")
     # Obtiene los datos del formulario
     cnx.insert_clientes([{
         "nombre": request.form.get('nombre'),
@@ -68,8 +66,6 @@ def agregar_cliente():
 
 @app.route('/api/agregar_clientes', methods=['POST'])
 def agregar_clientes():
-    print("LLEGO AQUI")
-    # Obtiene los datos del formulario
     clientes_data = request.get_json()["clientes"]
     print(clientes_data)
     cnx.insert_clientes(clientes_data)
@@ -85,10 +81,9 @@ def list_clientes():
 
 @app.route('/api/eliminar_cliente', methods=['POST'])
 def eliminar_cliente():
-    print("LLEGO AQUI")
-    # Obtiene los datos del formulario
     cliente_id = request.form.get('id').split(',')
     print(cliente_id)
     cnx.eliminar_cliente(cliente_id)
     clientes = cnx.list_clientes()
     return clientes
+
